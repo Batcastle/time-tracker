@@ -120,6 +120,14 @@ if (not path.exists(CONFIG_FILE)):
 # More often gives better timing accuracy
 # Less often uses less CPU power
 $ polling_rate=2.8114754095
+
+# how to format time output in settings window
+# s = seconds
+# m = minutes
+# h = hours (default)
+# d = days
+# w = weeks
+$ time_format=h
 """)
 	except IOError:
 		eprint("ERROR: Could not write to config file.")

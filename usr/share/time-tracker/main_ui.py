@@ -81,6 +81,71 @@ class main_ui(Gtk.Window):
 		self.read_logs("clicked")
 		self.main()
 
+	def format_time(self, seconds, format_string):
+		if (format_string == "s"):
+			return round(seconds)
+		elif (format_string == "m"):
+			minutes = int(seconds / 60)
+			if (minutes >= 1):
+				seconds = seconds - (minutes * 60)
+			else:
+				return seconds
+			return "%s minutes, %s seconds" % (minutes, round(seconds))
+		elif (format_string == "h"):
+			minutes = int(seconds / 60)
+			if (minutes >= 1):
+				seconds = seconds - (minutes * 60)
+				if (minutes >= 60):
+					hours = int(minutes/60)
+					minutes = minutes - (hours * 60)
+					return "%s hours, %s minutes, %s seconds" % (hours, minutes, round(seconds))
+				else:
+					return "%s minutes, %s seconds" % (minutes, round(seconds))
+			else:
+				return round(seconds)
+		elif (format_string == "d"):
+			minutes = int(seconds / 60)
+			if (minutes >= 1):
+				seconds = seconds - (minutes * 60)
+				if (minutes >= 60):
+					hours = int(minutes/60)
+					minutes = minutes - (hours * 60)
+					if (hours >= 24):
+						days = int(hours / 24)
+						hours = hours - (days * 24)
+						return "%s days, %s hours, %s minutes, %s seconds" % (days, hours, minutes, round(seconds))
+					else:
+						return "%s hours, %s minutes, %s seconds" % (hours, minutes, round(seconds))
+				else:
+					return "%s minutes, %s seconds" % (minutes, round(seconds))
+			else:
+				return round(seconds)
+		elif (format_string == "w"):
+			minutes = int(seconds / 60)
+			if (minutes >= 1):
+				seconds = seconds - (minutes * 60)
+				if (minutes >= 60):
+					hours = int(minutes/60)
+					minutes = minutes - (hours * 60)
+					if (hours >= 24):
+						days = int(hours / 24)
+						hours = hours - (days * 24)
+						if (days >= 7):
+							weeks = int(days / 7)
+							days = days - (weeks * 7)
+							return "%s weeks, %s days, %s hours, %s minutes, %s seconds" % (weeks, days, hours, minutes, round(seconds))
+						else:
+							return "%s days, %s hours, %s minutes, %s seconds" % (days, hours, minutes, round(seconds))
+					else:
+						return "%s hours, %s minutes, %s seconds" % (hours, minutes, round(seconds))
+				else:
+					return "%s minutes, %s seconds" % (minutes, round(seconds))
+			else:
+				return round(seconds)
+		else:
+			return self.format_time(seconds, "h")
+
+
 	def main(self):
 		global running
 		self.clear_window()
@@ -105,7 +170,7 @@ class main_ui(Gtk.Window):
 			self.page0.attach(globals()[each + "_label"], horiz, vert, 1, 1)
 
 			globals()[each + "_label1"] = Gtk.Label()
-			globals()[each + "_label1"].set_markup("""\n\t%s seconds\t\n""" % (round(globals()[each])))
+			globals()[each + "_label1"].set_markup("""\n\t%s\t\n""" % (self.format_time(globals()[each], self.time_format)))
 			globals()[each + "_label1"].set_justify(Gtk.Justification.LEFT)
 			self.page0.attach(globals()[each + "_label1"], horiz + 1, vert, 1, 1)
 
@@ -117,7 +182,7 @@ class main_ui(Gtk.Window):
 		self.page0.attach(self.label, horiz, vert, 1, 1)
 
 		self.label1 = Gtk.Label()
-		self.label1.set_markup("""\n\t%s seconds\t\n""" % (round(self.total)))
+		self.label1.set_markup("""\n\t%s\t\n""" % (self.format_time(self.total, self.time_format)))
 		self.label1.set_justify(Gtk.Justification.LEFT)
 		self.page0.attach(self.label1, horiz + 1, vert, 1, 1)
 
@@ -282,6 +347,14 @@ class main_ui(Gtk.Window):
 # More often gives better timing accuracy
 # Less often uses less CPU power
 $ polling_rate=2.8114754095
+
+# how to format time output in settings window
+# s = seconds
+# m = minutes
+# h = hours (default)
+# d = days
+# w = weeks
+$ time_format=h
 """)
 			except IOError:
 				eprint("ERROR: Could not write to config file.")
@@ -291,6 +364,9 @@ $ polling_rate=2.8114754095
 				contents = list(contents)
 				contents = "".join(contents)
 				self.processes = contents.split("\n")
+			# set deault values
+			self.polling_rate = 2.8114754095
+			self.time_format = "h"
 			for each in range(len(self.processes) - 1, -1, -1):
 				if (len(self.processes[each]) <= 1):
 					del(self.processes[each])
@@ -299,6 +375,9 @@ $ polling_rate=2.8114754095
 				elif (self.processes[each][0] == "$"):
 					if ("polling_rate" in self.processes[each][1:]):
 						self.polling_rate = float(self.processes[each].split("=")[1])
+						del(self.processes[each])
+					if ("time_format" in self.processes[each][1:]):
+						self.time_format = self.processes[each].split("=")[1]
 						del(self.processes[each])
 
 	def apply(self, button):
@@ -321,7 +400,16 @@ $ polling_rate=2.8114754095
 # More often gives better timing accuracy
 # Less often uses less CPU power
 $ polling_rate=%s
-""" % (self.polling_rate))
+
+
+# how to format time output in settings window
+# s = seconds
+# m = minutes
+# h = hours (default)
+# d = days
+# w = weeks
+$ time_format=%s
+""" % (self.polling_rate, self.time_format))
 						for each in self.processes:
 							out_file.write(each)
 							out_file.write("\n")
