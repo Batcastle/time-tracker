@@ -1,5 +1,5 @@
 Package: time-tracker
-Version: 0.0.2-alpha0
+Version: 0.0.3-alpha0
 Maintainer: Thomas Castleman <contact@draugeros.org>
 Section: python
 Homepage: https://github.com/Batcastle/time-tracker

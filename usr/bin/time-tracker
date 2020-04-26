@@ -90,7 +90,7 @@ argc = len(argv)
 CONFIG_DIR = getenv("HOME") + "/.config/time-tracker"
 CONFIG_FILE = CONFIG_DIR + "/time-tracker.conf"
 processes = []
-VERSION = "0.0.1-alpha0"
+VERSION = "0.0.3-alpha0"
 HELP = """time-tracker, Version %s
 
 \t-d, --daemonize\t\tFork to background.
