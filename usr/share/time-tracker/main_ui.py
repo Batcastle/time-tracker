@@ -161,7 +161,7 @@ class main_ui(Gtk.Window):
 
 		stack_switcher = Gtk.StackSwitcher()
 		stack_switcher.set_stack(stack)
-		self.grid.attach(stack_switcher, 1, 1, 4, 1)
+		self.grid.attach(stack_switcher, 2, 1, 1, 1)
 
 		vert = 0
 		horiz = 0
