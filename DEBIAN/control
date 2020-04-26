@@ -1,0 +1,10 @@
+Package: time-tracker
+Version: 0.0.2-alpha0
+Maintainer: Thomas Castleman <contact@draugeros.org>
+Section: python
+Homepage: https://github.com/Batcastle/time-tracker
+Architecture: all
+Priority: optional
+Depends: python3 (>=3.7), procps (>=2:3.3), gir1.2-gtk-3.0 (>=3.24.12-1ubuntu1)
+Description: Track how long you use specific apps on your Linux machine
+ Time Tracker provides a robust and easy way to track your usage of any number of given apps. It can run in the background and track how long you use different apps and quitely write the times to log files you can use later.

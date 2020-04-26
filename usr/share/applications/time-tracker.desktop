@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Time Tracker
+Version=1.0
+Exec=/usr/share/time-tracker/main_ui.py
+Icon=time
+Type=Application
+Terminal=false
+StartupNotify=true
+Encoding=UTF-8
+Categories=Application;GTK;Utility;
