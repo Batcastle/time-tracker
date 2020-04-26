@@ -77,6 +77,10 @@ class main_ui(Gtk.Window):
 		self.read_logs("clicked")
 		self.main()
 
+	def reload(self, button):
+		self.read_logs("clicked")
+		self.main()
+
 	def main(self):
 		global running
 		self.clear_window()
@@ -120,6 +124,10 @@ class main_ui(Gtk.Window):
 		self.toggle = Gtk.Button.new_with_label("\n\t%s Tracking\t\n" % (running))
 		self.toggle.connect("clicked", self.track)
 		self.page0.attach(self.toggle, horiz, vert + 1, 2, 1)
+
+		self.toggle = Gtk.Button.new_with_label("\n\tReload Report\t\n")
+		self.toggle.connect("clicked", self.reload)
+		self.page0.attach(self.toggle, horiz, vert + 2, 2, 1)
 
 		self.label2 = Gtk.Label()
 		self.label2.set_markup("\nApps to Follow\n")
