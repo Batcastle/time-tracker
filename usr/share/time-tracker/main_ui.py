@@ -221,7 +221,7 @@ class main_ui(Gtk.Window):
 		self.label3 = Gtk.Label()
 		self.label3.set_markup("\nTiming Sensitivity\n")
 		self.label3.set_justify(Gtk.Justification.CENTER)
-		self.page1.attach(self.label3, 1, vert + 1, 2, 1)
+		self.page1.attach(self.label3, 1, vert + 1, 4, 1)
 
 		adj = Gtk.Adjustment.new(self.sec_to_scale(self.polling_rate), 1, 10, 0.1, 0.1, 1)
 		self.scale = Gtk.Scale.new(Gtk.Orientation.HORIZONTAL, adj)
@@ -229,8 +229,22 @@ class main_ui(Gtk.Window):
 		self.scale.add_mark(5, Gtk.PositionType.TOP, "Average")
 		self.scale.add_mark(10, Gtk.PositionType.TOP, "More Precise")
 		self.scale.connect("change-value", self.scale_to_sec)
-		self.page1.attach(self.scale, 1, vert + 3, 3, 1)
+		self.page1.attach(self.scale, 1, vert + 3, 4, 1)
 
+		self.label4 = Gtk.Label()
+		self.label4.set_markup("\nTiming Format\n")
+		self.label4.set_justify(Gtk.Justification.CENTER)
+		self.page1.attach(self.label4, 3, 1, 2, 1)
+
+		self.formatting = Gtk.ComboBoxText.new()
+		self.formatting.append("s", "Seconds")
+		self.formatting.append("m", "Minutes")
+		self.formatting.append("h", "Hours (Default)")
+		self.formatting.append("d", "Days")
+		self.formatting.append("w", "Weeks")
+		self.formatting.set_active_id(self.time_format)
+		self.formatting.connect("changed", self.change_formatting)
+		self.page1.attach(self.formatting, 3, 2, 2, 1)
 
 		self.button2 = Gtk.Button.new_with_label("Done")
 		self.button2.connect("clicked", self.apply)
@@ -242,6 +256,11 @@ class main_ui(Gtk.Window):
 			stack.set_visible_child(stack.get_child_by_name("page1"))
 
 		self.show_all()
+
+	def change_formatting(self, button):
+		self.time_format = self.formatting.get_active_id()
+		print(self.time_format)
+		self.main(2)
 
 	def track(self, widget):
 		global running
