@@ -1,0 +1,164 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+#
+#  time-tracker
+#
+#  Copyright 2020 Thomas Castleman <contact@draugeros.org>
+#
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+#  MA 02110-1301, USA.
+#
+#
+# import modules
+from __future__ import print_function
+from sys import argv, stderr, version_info
+from subprocess import check_output, Popen, CalledProcessError
+from os import getenv, mkdir, path
+from time import sleep, time
+from threading import Thread
+from ctypes import cdll, byref, create_string_buffer
+
+# version check
+if (version_info[0] == 2):
+	print("Please run with Python 3 as Python 2 is End-of-Life.")
+	exit(2)
+
+
+# define functions
+# Make it easier for us to print to stderr
+def eprint(*args, **kwargs):
+	print(*args, file=stderr, **kwargs)
+
+
+def pgrep(proc_name):
+	try:
+		check_output(["pgrep", proc_name])
+		return True
+	except CalledProcessError:
+		return False
+
+def set_procname(newname):
+	libc = cdll.LoadLibrary('libc.so.6')    #Loading a 3rd party library C
+	buff = create_string_buffer(len(newname)) #Note: One larger than the name (man prctl says that)
+	buff.value = bytes(newname, "utf-8")                 #Null terminated string as it should be
+	libc.prctl(15, byref(buff), 0, 0, 0) #Refer to "#define" of "/usr/include/linux/prctl.h" for the misterious value 16 & arg[3..5] are zero as the man page says.
+
+
+set_procname("time-tracker")
+# Poll for a spoecific process every so often
+def watch_dog(proc_name, polling_rate, CONFIG_DIR):
+	print("Thread " + proc_name + " Started")
+	start_time = 0
+	end_time = 0
+	total_time = 0
+	while True:
+		if (pgrep(proc_name) and (start_time == 0)):
+			start_time = time()
+			print("TIMING " + proc_name)
+		elif ((not pgrep(proc_name)) and (start_time != 0)):
+			end_time = time()
+			total_time = str(end_time - start_time)
+			print("Done timing " + proc_name)
+			print("TIME: " + total_time)
+			try:
+				with open(CONFIG_DIR + proc_name + "-time.log", "w+") as log_file:
+					log_file.write(total_time)
+					log_file.write("\n")
+					log_file.flush()
+			except:
+				eprint("CANNOT WRITE TO FILE")
+			start_time = 0
+			end_time = 0
+			total_time = 0
+		sleep(polling_rate)
+
+
+# set initial vars
+# get length of argv
+argc = len(argv)
+CONFIG_DIR = getenv("HOME") + "/.config/time-tracker"
+CONFIG_FILE = CONFIG_DIR + "/time-tracker.conf"
+processes = []
+VERSION = "0.0.1-alpha0"
+HELP = """time-tracker, Version %s
+
+\t-d, --daemonize\t\tFork to background.
+\t-h, --help\t\tPrint this help dialog and exit.
+\t-v, --version\t\tPrint current version and exit""" % (VERSION)
+
+# load/generate config
+if (not path.exists(CONFIG_FILE)):
+	try:
+		mkdir(getenv("HOME") + "/.config")
+	except FileExistsError:
+		pass
+	try:
+		mkdir(CONFIG_DIR)
+	except FileExistsError:
+		pass
+	try:
+		with open(CONFIG_FILE, "w+") as out_file:
+			out_file.write("""# Config File for time-tracker
+# lines starting with '#' are comments
+# lines starting with '$' are internal vars
+# on each line, place process name of each app to be tracked
+# so for instance if you want to track Filezilla usage, put
+# 'filezilla' on it's own line (no quotation marks)
+
+# How often to poll for processes, in seconds, floating point numbers supported
+# More often gives better timing accuracy
+# Less often uses less CPU power
+$ polling_rate=2.8114754095
+""")
+	except IOError:
+		eprint("ERROR: Could not write to config file.")
+else:
+	with open(CONFIG_FILE, "r") as in_file:
+		contents = str(in_file.read())
+		contents = list(contents)
+		contents = "".join(contents)
+		processes = contents.split("\n")
+	for each in range(len(processes) - 1, -1, -1):
+		if (len(processes[each]) <= 1):
+			del(processes[each])
+		elif (processes[each][0] == "#"):
+			del(processes[each])
+		elif (processes[each][0] == "$"):
+			if ("polling_rate" in processes[each][1:]):
+				polling_rate = float(processes[each].split("=")[1])
+				del(processes[each])
+
+# handle CLI options
+if (argc <= 1):
+	# Default action
+	for each in processes:
+		globals()[each] = Thread(target=watch_dog,
+			args=(each, polling_rate, CONFIG_DIR,))
+		globals()[each].start()
+elif ((argv[1] == "-h") or (argv[1] == "--help")):
+	print(HELP)
+	exit(0)
+elif ((argv[1] == "-v") or (argv[1] == "--version")):
+	print(VERSION)
+	exit(0)
+elif ((argv[1] == "-d") or (argv[1] == "--daemonize")):
+	Popen(argv[0])
+	exit(0)
+# handle unknown flags
+else:
+	eprint("ERROR: option `%s' not understood" % (argv[1]))
+	eprint(HELP)
+	exit(2)
+
