@@ -75,11 +75,11 @@ class main_ui(Gtk.Window):
 		self.set_icon_name("time")
 		self.read_settings()
 		self.read_logs("clicked")
-		self.main()
+		self.main(1)
 
 	def reload(self, button):
 		self.read_logs("clicked")
-		self.main()
+		self.main(1)
 
 	def format_time(self, seconds, format_string):
 		if (format_string == "s"):
@@ -146,7 +146,7 @@ class main_ui(Gtk.Window):
 			return self.format_time(seconds, "h")
 
 
-	def main(self):
+	def main(self, page):
 		global running
 		self.clear_window()
 
@@ -154,7 +154,9 @@ class main_ui(Gtk.Window):
 		# They have been made local to just this def in order to prevent a bug
 		stack = Gtk.Stack()
 		stack.add_titled(self.page0, "page0", "Report")
+		self.page0.set_visible(True)
 		stack.add_titled(self.page1, "page1", "Settings")
+		self.page1.set_visible(True)
 		self.grid.attach(stack, 1, 2, 4, 1)
 
 		stack_switcher = Gtk.StackSwitcher()
@@ -234,6 +236,11 @@ class main_ui(Gtk.Window):
 		self.button2.connect("clicked", self.apply)
 		self.grid.attach(self.button2, 1, 3, 1, 1)
 
+		if (page == 1):
+			stack.set_visible_child(stack.get_child_by_name("page0"))
+		elif (page == 2):
+			stack.set_visible_child(stack.get_child_by_name("page1"))
+
 		self.show_all()
 
 	def track(self, widget):
@@ -244,7 +251,7 @@ class main_ui(Gtk.Window):
 		else:
 			Popen(["../../bin/time-tracker"])
 			running = "Stop"
-		self.main()
+		self.main(1)
 
 	def add_program(self, widget):
 			dialog = Gtk.FileChooserDialog("Time Tracker", self,
@@ -262,7 +269,7 @@ class main_ui(Gtk.Window):
 
 			dialog.destroy()
 			self.read_logs("clicked")
-			self.main()
+			self.main(2)
 
 	def add_filters(self, dialog):
 		filter_text = Gtk.FileFilter()
@@ -301,7 +308,7 @@ class main_ui(Gtk.Window):
 				break
 
 		self.clear_window()
-		self.main()
+		self.main(2)
 
 	def read_logs(self, button):
 		global CONFIG_DIR
