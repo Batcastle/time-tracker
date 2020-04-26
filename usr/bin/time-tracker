@@ -73,10 +73,9 @@ def watch_dog(proc_name, polling_rate, CONFIG_DIR):
 			print("Done timing " + proc_name)
 			print("TIME: " + total_time)
 			try:
-				with open(CONFIG_DIR + proc_name + "-time.log", "w+") as log_file:
+				with open(CONFIG_DIR + "/" + proc_name + "-time.log", "a") as log_file:
 					log_file.write(total_time)
 					log_file.write("\n")
-					log_file.flush()
 			except:
 				eprint("CANNOT WRITE TO FILE")
 			start_time = 0
