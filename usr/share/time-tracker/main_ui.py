@@ -100,24 +100,24 @@ class main_ui(Gtk.Window):
 		horiz = 0
 		for each in self.processes:
 			globals()[each + "_label"] = Gtk.Label()
-			globals()[each + "_label"].set_markup("""\n\t%s:\t\n""" % (each))
+			globals()[each + "_label"].set_markup("""\n\t<b>%s:</b>\t\n""" % (each))
 			globals()[each + "_label"].set_justify(Gtk.Justification.LEFT)
 			self.page0.attach(globals()[each + "_label"], horiz, vert, 1, 1)
 
 			globals()[each + "_label1"] = Gtk.Label()
-			globals()[each + "_label1"].set_markup("""\n\t%s seconds\t\n""" % (globals()[each]))
+			globals()[each + "_label1"].set_markup("""\n\t%s seconds\t\n""" % (round(globals()[each])))
 			globals()[each + "_label1"].set_justify(Gtk.Justification.LEFT)
 			self.page0.attach(globals()[each + "_label1"], horiz + 1, vert, 1, 1)
 
 			vert = vert + 1
 
 		self.label = Gtk.Label()
-		self.label.set_markup("""\n\tTotal:\t\n""")
+		self.label.set_markup("""\n\t<b>Total:</b>\t\n""")
 		self.label.set_justify(Gtk.Justification.LEFT)
 		self.page0.attach(self.label, horiz, vert, 1, 1)
 
 		self.label1 = Gtk.Label()
-		self.label1.set_markup("""\n\t%s seconds\t\n""" % (self.total))
+		self.label1.set_markup("""\n\t%s seconds\t\n""" % (round(self.total)))
 		self.label1.set_justify(Gtk.Justification.LEFT)
 		self.page0.attach(self.label1, horiz + 1, vert, 1, 1)
 
@@ -251,7 +251,10 @@ class main_ui(Gtk.Window):
 					contents = num_file.read()
 				numbers = contents.split("\n")
 				for each1 in numbers:
-					globals()[each] = globals()[each] + float(each1)
+					try:
+						globals()[each] = globals()[each] + float(each1)
+					except ValueError:
+						pass
 			self.total = self.total + globals()[each]
 
 	def read_settings(self):
