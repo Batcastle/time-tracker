@@ -83,7 +83,7 @@ class main_ui(Gtk.Window):
 
 	def format_time(self, seconds, format_string):
 		if (format_string == "s"):
-			return round(seconds)
+			return "%s seconds" % (round(seconds))
 		elif (format_string == "m"):
 			minutes = int(seconds / 60)
 			if (minutes >= 1):
@@ -102,7 +102,7 @@ class main_ui(Gtk.Window):
 				else:
 					return "%s minutes, %s seconds" % (minutes, round(seconds))
 			else:
-				return round(seconds)
+				return "%s seconds" % (round(seconds))
 		elif (format_string == "d"):
 			minutes = int(seconds / 60)
 			if (minutes >= 1):
@@ -119,7 +119,7 @@ class main_ui(Gtk.Window):
 				else:
 					return "%s minutes, %s seconds" % (minutes, round(seconds))
 			else:
-				return round(seconds)
+				return "%s seconds" % (round(seconds))
 		elif (format_string == "w"):
 			minutes = int(seconds / 60)
 			if (minutes >= 1):
@@ -141,7 +141,7 @@ class main_ui(Gtk.Window):
 				else:
 					return "%s minutes, %s seconds" % (minutes, round(seconds))
 			else:
-				return round(seconds)
+				return "%s seconds" % (round(seconds))
 		else:
 			return self.format_time(seconds, "h")
 
